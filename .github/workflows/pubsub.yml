@@ -1,4 +1,4 @@
-name: PubSub Emulator
+name: Node.js CI
 
 on:
   push:
@@ -9,13 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    services:
-      pubsub-emulator:
-        image: gcr.io/google/cloud-sdk:latest
-        ports:
-          - 8085:8085
-        options: >-
-          bash -c "gcloud components install beta pubsub-emulator --quiet && gcloud beta emulators pubsub start --host-port=0.0.0.0:8085"    
 
     steps:
     - uses: actions/checkout@v4
@@ -28,8 +21,16 @@ jobs:
     - name: Install dependencies
       run: npm install
 
+    - name: Build Pub/Sub Emulator Docker Image
+      run: docker build -t pubsub-emulator .
+
+    - name: Start Pub/Sub Emulator
+      run: |
+        docker run -d -p 8085:8085 --name pubsub-emulator pubsub-emulator
+
     - name: Set Pub/Sub Emulator Host
       run: echo "PUBSUB_EMULATOR_HOST=localhost:8085" >> $GITHUB_ENV
 
     - name: Run tests
-      run: node index
+      run: node index.js
+
