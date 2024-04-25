@@ -11,12 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     services:
       pubsub-emulator:
-        image: gcr.io/google.com/cloudsdktool/cloud-sdk:latest
+        image: gcr.io/google/cloud-sdk:latest
         ports:
           - 8085:8085
         options: >-
-          gcloud beta emulators pubsub start
-          --host-port=0.0.0.0:8085
+          bash -c "gcloud components install beta pubsub-emulator --quiet && gcloud beta emulators pubsub start --host-port=0.0.0.0:8085"    
 
     steps:
     - uses: actions/checkout@v4
