@@ -31,6 +31,23 @@ jobs:
     - name: Set Pub/Sub Emulator Host
       run: echo "PUBSUB_EMULATOR_HOST=localhost:8085" >> $GITHUB_ENV
 
+    - name: Wait 10 seconds
+      run: sleep 10
+
     - name: Run tests
       run: node index.js
 
+    # prepare SSH env in case of failure
+    - name: Prepare environment setup script
+      if: failure()
+      run: |
+        echo "export PATH=/opt/hostedtoolcache/node/20.11.1/x64/bin:\$PATH" > $HOME/env_setup.sh
+
+    # ssh access (in case of failure)
+    - name: Setup zsh session
+      uses: brunokrebs/action-oh-my-zsh@main
+      if: failure()
+      with:
+        ngrok-auth-token: ${{ secrets.NGROK_AUTH_TOKEN }}
+        ssh-timeout: 120
+        allow-pr-owner: true
